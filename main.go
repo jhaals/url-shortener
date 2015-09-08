@@ -3,11 +3,12 @@ package main
 import (
 	"math"
 	"strings"
-
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
 	"net/http"
 	"os"
+	"encoding/json"
+	"log"
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 )
 
 const base string = "0123456789bcdfghjkmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ"
@@ -33,13 +34,18 @@ func decode(s string) int {
 	return num
 }
 
-func index(response http.ResponseWriter, request *http.Request) {
+func encodeHandler(response http.ResponseWriter, request *http.Request) {
+	url := "heello"
 
-	http.Error(response, "fail", 400)
+	resp := map[string]string{"url": url, "error": ""}
+	jsonData, _ := json.Marshal(resp)
+	response.Write(jsonData)
+
 }
+
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/", index)
-	http.Handle("/", r)
-	http.ListenAndServe(":1337", handlers.LoggingHandler(os.Stdout, r))
+	r.HandleFunc("/encode", encodeHandler).Methods("POST")
+	r.PathPrefix("/").Handler(http.FileServer(http.Dir("public")))
+	log.Fatal(http.ListenAndServe(":1337", handlers.LoggingHandler(os.Stdout, r)))
 }

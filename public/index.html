@@ -1,0 +1,14 @@
+<!doctype html>
+<html ng-app="url-shortener">
+  <head>
+    <title>URL shortener</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
+    <script src="script.js"></script>
+  </head>
+  <body ng-controller="createCtrl">
+    URL <input ng-model="url">
+     <button type="button" class="btn btn-primary btn-lg btn-block" ng-click="save(url)">Make URL shorter</button>
+  </body>
+  <br/>
+  {{short_url}}
+</html>
