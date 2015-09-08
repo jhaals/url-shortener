@@ -35,9 +35,17 @@ func decode(s string) int {
 }
 
 func encodeHandler(response http.ResponseWriter, request *http.Request) {
-	url := "heello"
+	decoder := json.NewDecoder(request.Body)
+	var data struct {
+		URL    string `json:"url"`
+	}
+	err := decoder.Decode(&data)
+	if err != nil {
+		http.Error(response, `{"error": "Unable to parse json"}`, http.StatusBadRequest)
+		return
+	}
 
-	resp := map[string]string{"url": url, "error": ""}
+	resp := map[string]string{"url": data.URL, "error": ""}
 	jsonData, _ := json.Marshal(resp)
 	response.Write(jsonData)
 
