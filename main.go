@@ -1,14 +1,15 @@
 package main
 
 import (
-	"math"
-	"strings"
-	"net/http"
-	"os"
 	"encoding/json"
-	"log"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+
+	"log"
+	"math"
+	"net/http"
+	"os"
+	"strings"
 )
 
 const base string = "0123456789bcdfghjkmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ"
@@ -34,10 +35,15 @@ func decode(s string) int {
 	return num
 }
 
+func decodeHandler(response http.ResponseWriter, request *http.Request) {
+	log.Println(mux.Vars(request)["id"])
+	http.Redirect(response, request, "http://google.com", 301)
+}
+
 func encodeHandler(response http.ResponseWriter, request *http.Request) {
 	decoder := json.NewDecoder(request.Body)
 	var data struct {
-		URL    string `json:"url"`
+		URL string `json:"url"`
 	}
 	err := decoder.Decode(&data)
 	if err != nil {
@@ -52,8 +58,13 @@ func encodeHandler(response http.ResponseWriter, request *http.Request) {
 }
 
 func main() {
+
+	db := sqlite{Path: "./db.sqlite"}
+	db.Init()
+
 	r := mux.NewRouter()
 	r.HandleFunc("/encode", encodeHandler).Methods("POST")
+	r.HandleFunc("/{id}", decodeHandler).Methods("GET")
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("public")))
 	log.Fatal(http.ListenAndServe(":1337", handlers.LoggingHandler(os.Stdout, r)))
 }
