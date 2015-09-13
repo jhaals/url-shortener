@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/asaskevich/govalidator"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"log"
@@ -53,6 +54,11 @@ func encodeHandler(response http.ResponseWriter, request *http.Request, db Datab
 	err := decoder.Decode(&data)
 	if err != nil {
 		http.Error(response, `{"error": "Unable to parse json"}`, http.StatusBadRequest)
+		return
+	}
+	log.Println(data.URL)
+	if !govalidator.IsURL(data.URL) {
+		http.Error(response, `{"error": "Not a valid URL"}`, http.StatusBadRequest)
 		return
 	}
 	id, err := db.Save(data.URL)
