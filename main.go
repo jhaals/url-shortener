@@ -56,11 +56,12 @@ func encodeHandler(response http.ResponseWriter, request *http.Request, db Datab
 		http.Error(response, `{"error": "Unable to parse json"}`, http.StatusBadRequest)
 		return
 	}
-	log.Println(data.URL)
+
 	if !govalidator.IsURL(data.URL) {
 		http.Error(response, `{"error": "Not a valid URL"}`, http.StatusBadRequest)
 		return
 	}
+
 	id, err := db.Save(data.URL)
 	if err != nil {
 		log.Println(err)
@@ -75,14 +76,16 @@ func encodeHandler(response http.ResponseWriter, request *http.Request, db Datab
 
 func main() {
 
-	baseURL := "http://127.0.0.1:1337/"
+	if os.Getenv("BASE_URL") == "" {
+		log.Fatal("BASE_URL environment varible must be set")
+	}
 	db := sqlite{Path: "./db.sqlite"}
 	db.Init()
 
 	r := mux.NewRouter()
 	r.HandleFunc("/encode",
 		func(response http.ResponseWriter, request *http.Request) {
-			encodeHandler(response, request, db, baseURL)
+			encodeHandler(response, request, db, os.Getenv("BASE_URL"))
 		}).Methods("POST")
 	r.HandleFunc("/{id}", func(response http.ResponseWriter, request *http.Request) {
 		decodeHandler(response, request, db)
