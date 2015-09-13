@@ -79,7 +79,10 @@ func main() {
 	if os.Getenv("BASE_URL") == "" {
 		log.Fatal("BASE_URL environment varible must be set")
 	}
-	db := sqlite{Path: "./db.sqlite"}
+	if os.Getenv("DB_PATH") == "" {
+		log.Fatal("DB_PATH environment varible must be set")
+	}
+	db := sqlite{Path: path.Join(os.Getenv("DB_PATH"), "db.sqlite")}
 	db.Init()
 
 	r := mux.NewRouter()
