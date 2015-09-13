@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-
 	"log"
 	"math"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 )
 
@@ -35,12 +35,17 @@ func decode(s string) int {
 	return num
 }
 
-func decodeHandler(response http.ResponseWriter, request *http.Request) {
-	log.Println(mux.Vars(request)["id"])
-	http.Redirect(response, request, "http://google.com", 301)
+func decodeHandler(response http.ResponseWriter, request *http.Request, db Database) {
+	id := decode(mux.Vars(request)["id"])
+	url, err := db.Get(id)
+	if err != nil {
+		http.Error(response, `{"error": "No such URL"}`, http.StatusNotFound)
+		return
+	}
+	http.Redirect(response, request, url, 301)
 }
 
-func encodeHandler(response http.ResponseWriter, request *http.Request) {
+func encodeHandler(response http.ResponseWriter, request *http.Request, db Database, baseURL string) {
 	decoder := json.NewDecoder(request.Body)
 	var data struct {
 		URL string `json:"url"`
@@ -50,8 +55,13 @@ func encodeHandler(response http.ResponseWriter, request *http.Request) {
 		http.Error(response, `{"error": "Unable to parse json"}`, http.StatusBadRequest)
 		return
 	}
+	id, err := db.Save(data.URL)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
-	resp := map[string]string{"url": data.URL, "error": ""}
+	resp := map[string]string{"url": path.Join(baseURL, encode(id)), "error": ""}
 	jsonData, _ := json.Marshal(resp)
 	response.Write(jsonData)
 
@@ -59,12 +69,19 @@ func encodeHandler(response http.ResponseWriter, request *http.Request) {
 
 func main() {
 
+	baseURL := "http://127.0.0.1:1337/"
 	db := sqlite{Path: "./db.sqlite"}
 	db.Init()
 
 	r := mux.NewRouter()
-	r.HandleFunc("/encode", encodeHandler).Methods("POST")
-	r.HandleFunc("/{id}", decodeHandler).Methods("GET")
+	r.HandleFunc("/encode",
+		func(response http.ResponseWriter, request *http.Request) {
+			encodeHandler(response, request, db, baseURL)
+		}).Methods("POST")
+	r.HandleFunc("/{id}", func(response http.ResponseWriter, request *http.Request) {
+		decodeHandler(response, request, db)
+	})
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("public")))
+
 	log.Fatal(http.ListenAndServe(":1337", handlers.LoggingHandler(os.Stdout, r)))
 }

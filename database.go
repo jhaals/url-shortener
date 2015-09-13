@@ -6,16 +6,9 @@ import (
 	"log"
 )
 
-// Entry from database
-type Entry struct {
-	id    int64
-	url   string
-	views int64
-}
-
 // Database interface
 type Database interface {
-	Get(id int) (Entry, error)
+	Get(id int) (string, error)
 	Save(url string) (int64, error)
 }
 
@@ -25,19 +18,18 @@ type sqlite struct {
 
 func (s sqlite) Save(url string) (int64, error) {
 	db, err := sql.Open("sqlite3", s.Path)
-	defer db.Close()
 	tx, err := db.Begin()
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
 	stmt, err := tx.Prepare("insert into urls(url) values(?)")
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
 	defer stmt.Close()
 	result, err := stmt.Exec(url)
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
 
 	id, err := result.LastInsertId()
@@ -45,12 +37,23 @@ func (s sqlite) Save(url string) (int64, error) {
 		return 0, nil
 	}
 	tx.Commit()
-
+	//result
 	return id, nil
 }
 
-func (s sqlite) Get(id int) (Entry, error) {
-	return Entry{}, nil
+func (s sqlite) Get(id int) (string, error) {
+	db, err := sql.Open("sqlite3", s.Path)
+	stmt, err := db.Prepare("select url from urls where id = ?")
+	if err != nil {
+		return "", err
+	}
+	defer stmt.Close()
+	var url string
+	err = stmt.QueryRow(id).Scan(&url)
+	if err != nil {
+		return "", err
+	}
+	return url, nil
 }
 
 func (s sqlite) Init() {
