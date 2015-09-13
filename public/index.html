@@ -13,10 +13,12 @@
 
         $http.post('/encode', {url: url})
             .success(function(data, status, headers, config) {
+              $scope.error = null;
               $scope.short_url = data.url;
             })
             .error(function(data, status, headers, config) {
-              alert("fail");
+              $scope.short_url = null;
+              $scope.error = data.error;
             });
       }
     });
@@ -28,4 +30,5 @@
   </body>
   <br/>
   {{short_url}}
+  {{error}}
 </html>
