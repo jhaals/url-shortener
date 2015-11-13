@@ -86,7 +86,7 @@ func main() {
 	db.Init()
 
 	r := mux.NewRouter()
-	r.HandleFunc("/encode",
+	r.HandleFunc("/save",
 		func(response http.ResponseWriter, request *http.Request) {
 			encodeHandler(response, request, db, os.Getenv("BASE_URL"))
 		}).Methods("POST")
