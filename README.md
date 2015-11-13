@@ -7,3 +7,4 @@ Simple URL shortener backed by sqlite.
     	-e BASE_URL=http://mydomain.com \
     	-e DB_PATH=/data \
     	jhaals/url-shortener
+
