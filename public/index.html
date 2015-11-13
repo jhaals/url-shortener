@@ -14,7 +14,8 @@
         $http.post('/save', {url: url})
             .success(function(data, status, headers, config) {
               $scope.error = null;
-              $scope.short_url = data.url;
+              base_url = window.location.protocol+"//"+window.location.host+"/"+data.id
+              $scope.short_url = base_url;
             })
             .error(function(data, status, headers, config) {
               $scope.short_url = null;
