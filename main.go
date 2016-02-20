@@ -77,10 +77,10 @@ func encodeHandler(response http.ResponseWriter, request *http.Request, db Datab
 func main() {
 
 	if os.Getenv("BASE_URL") == "" {
-		log.Fatal("BASE_URL environment varible must be set")
+		log.Fatal("BASE_URL environment variable must be set")
 	}
 	if os.Getenv("DB_PATH") == "" {
-		log.Fatal("DB_PATH environment varible must be set")
+		log.Fatal("DB_PATH environment variable must be set")
 	}
 	db := sqlite{Path: path.Join(os.Getenv("DB_PATH"), "db.sqlite")}
 	db.Init()
