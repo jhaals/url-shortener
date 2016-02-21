@@ -68,7 +68,7 @@ func encodeHandler(response http.ResponseWriter, request *http.Request, db Datab
 		return
 	}
 
-	resp := map[string]string{"url": path.Join(baseURL, encode(id)), "id": encode(id), "error": ""}
+	resp := map[string]string{"url": baseURL + encode(id), "id": encode(id), "error": ""}
 	jsonData, _ := json.Marshal(resp)
 	response.Write(jsonData)
 
@@ -85,10 +85,15 @@ func main() {
 	db := sqlite{Path: path.Join(os.Getenv("DB_PATH"), "db.sqlite")}
 	db.Init()
 
+	baseURL := os.Getenv("BASE_URL")
+	if !strings.HasSuffix(baseURL, "/") {
+		baseURL += "/"
+	}
+
 	r := mux.NewRouter()
 	r.HandleFunc("/save",
 		func(response http.ResponseWriter, request *http.Request) {
-			encodeHandler(response, request, db, os.Getenv("BASE_URL"))
+			encodeHandler(response, request, db, baseURL)
 		}).Methods("POST")
 	r.HandleFunc("/{id}", func(response http.ResponseWriter, request *http.Request) {
 		decodeHandler(response, request, db)
