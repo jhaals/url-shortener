@@ -76,9 +76,9 @@ func encodeHandler(response http.ResponseWriter, request *http.Request, db Datab
 
 func main() {
 
-	if os.Getenv("BASE_URL") == "" {
-		log.Fatal("BASE_URL environment variable must be set")
-	}
+//	if os.Getenv("BASE_URL") == "" {
+//		log.Fatal("BASE_URL environment variable must be set")
+//	}
 	if os.Getenv("DB_PATH") == "" {
 		log.Fatal("DB_PATH environment variable must be set")
 	}
