@@ -15,3 +15,7 @@ There's also a simple web ui available
     	-e BASE_URL=http://mydomain.com \
     	-e DB_PATH=/data \
     	jhaals/url-shortener
+
+or use `docker-compose`  
+
+    docker-compose up -d

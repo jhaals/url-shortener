@@ -1,0 +1,11 @@
+version: '2.0'
+services:
+    shorturl:
+        volumes:
+            - '.:/data'
+        ports:
+            - '1337:1337'
+        environment:
+            - BASE_URL=http://mydomain.com
+            - DB_PATH=/data
+        image: jhaals/url-shortener
